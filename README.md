@@ -29,7 +29,7 @@ while true; do vmctl console openbsd-example; sleep 3; done
 Then start the actual _packer_ build:
 
 ```
-packer build openbsd-example.json
+packer build examples/openbsd.json
 ```
 
 This should leave you with an `output-vmm/openbsd-example.raw` bootable disk image of a clean OpenBSD installation.
