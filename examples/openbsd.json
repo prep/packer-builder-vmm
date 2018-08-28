@@ -1,0 +1,55 @@
+{
+  "description": "Example OpenBSD installation on VMM",
+
+  "variables": {
+    "realname": "Packer",
+    "username": "packer",
+    "password": "packer"
+  },
+
+  "builders": [
+    {
+      "type":      "vmm",
+      "vm_name":   "openbsd-example",
+      "disk_size": "2G",
+      "mem_size":  "512M",
+
+      "iso_urls":          ["downloads/install64.fs", "https://ftp.nluug.nl/pub/OpenBSD/snapshots/amd64/install64.fs"],
+      "iso_checksum":      "02a7023539a1ed1d66e933c7f28db294e599f93175dc7f4eafc56a185207a8e9",
+      "iso_checksum_type": "sha256",
+
+      "boot_wait": "20s",
+      "boot_command": [
+        "S<enter>",
+
+        "cat <<EOF >disklabel.template<enter>",
+        "/ 1G-* 100%<enter>",
+        "EOF<enter>",
+
+        "cat <<EOF >install.conf<enter>",
+        "System hostname = openbsd-example<enter>",
+        "DNS domain name = codeninja.nl<enter>",
+        "Password for root account = {{user `password`}}<enter>",
+        "Do you expect to run the X Window System = no<enter>",
+        "Setup a user = {{user `username`}}<enter>",
+        "Full name for user = {{user `realname`}}<enter>",
+        "Password for user = {{user `password`}}<enter>",
+        "Which disk is the root disk = sd1<enter>",
+        "Use (A)uto layout, (E)dit auto layout, or create (C)ustom layout = c<enter>",
+        "URL to autopartitioning template for disklabel = file://disklabel.template<enter>",
+        "Location of sets = disk<enter>",
+        "Is the disk partition already mounted = no<enter>",
+        "Set name(s) = -bsd.rd<enter>",
+        "Set name(s) = done<enter>",
+        "Directory does not contain SHA256.sig. Continue without verification = yes<enter>",
+        "What timezone are you in = UTC<enter>",
+        "EOF<enter>",
+
+        "install -af install.conf<enter>",
+        "<wait4m>",
+
+        "/sbin/halt -p<enter><wait15>"
+      ]
+    }
+  ]
+}
