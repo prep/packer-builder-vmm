@@ -14,7 +14,10 @@ Then move the newly built `~/go/bin/packer-builder-vmm` binary to either `~/.pac
 
 2. Notes
 --------
-It is assumed that you run `packer` as an unprivileged user and that `doas` can be used to start both `vmctl` and `tee`. The `tee` command is used to get write-only access to the pseudo TTY to send the build process commands.
+* It is assumed that you run `packer` as an unprivileged user and that `doas` can be used to start both `vmctl` and `tee`. The `tee` command is used to get write-only access to the pseudo TTY to send the build process commands.
+* For now, instances will only be started with a local network interface. The ability to attach a network interface to a virtual switch will be added later.
+* Due to the above constraint and the inability to determine both the host and client IP address, the HTTP server functionality doesn't work.
+* Because the client IP address cannot be determined, provisioning isn't implemented yet so everything has to be packed into the `boot_command`.
 
 3. Example
 ----------
