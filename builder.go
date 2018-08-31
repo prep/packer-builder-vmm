@@ -149,13 +149,20 @@ func (builder *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) 
 	builder.runner = common.NewRunnerWithPauseFn(steps, builder.config.PackerConfig, ui, state)
 	builder.runner.Run(state)
 
+	if v := state.Get("error"); v != nil {
+		err = v.(error)
+	}
+	if err == nil {
+		err = errors.New("unknown error")
+	}
+
 	// If we were interrupted or cancelled, then just exit.
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		return nil, errors.New("Build was cancelled.")
+		return nil, errors.New("Build was cancelled: " + err.Error())
 	}
 
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		return nil, errors.New("Build was halted.")
+		return nil, errors.New("Build was halted: " + err.Error())
 	}
 
 	artifact := &Artifact{
