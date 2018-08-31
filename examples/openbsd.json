@@ -2,6 +2,9 @@
   "description": "Example OpenBSD installation on VMM",
 
   "variables": {
+    "hostname":    "openbsd",
+    "domain":      "example.com",
+
     "realname": "Packer",
     "username": "packer",
     "password": "packer"
@@ -27,8 +30,8 @@
         "EOF<enter>",
 
         "cat <<EOF >install.conf<enter>",
-        "System hostname = openbsd-example<enter>",
-        "DNS domain name = codeninja.nl<enter>",
+        "System hostname = {{user `hostname`}}<enter>",
+        "DNS domain name = {{user `domain`}}<enter>",
         "Password for root account = {{user `password`}}<enter>",
         "Do you expect to run the X Window System = no<enter>",
         "Setup a user = {{user `username`}}<enter>",
