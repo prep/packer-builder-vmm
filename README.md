@@ -20,7 +20,7 @@ Then move the newly built `~/go/bin/packer-builder-vmm` binary to either `~/.pac
 
 3. Example
 ----------
-This project has a couple of example packer configurations in the [examples](examples) directory, like [examples/alpine.json](an Alpine Linux 3.8.0 installation) and [examples/openbsd.json](an OpenBSD 6.4-beta installation). Note that you need to update the SHA256 hash of the OpenBSD installation yourself, as it references a snapshot installation file that gets updated regularly.
+This project has a couple of example packer configurations in the [examples](examples) directory, like [an Alpine Linux 3.8.0 installation](examples/alpine.json) and [an OpenBSD 6.4-beta installation](examples/openbsd.json). Note that you need to update the SHA256 hash of the OpenBSD installation yourself, as it references a snapshot installation file that gets updated regularly.
 
 Before any build is started, poll _vmctl_ in a separate terminal for the specific VM that the build is going to start. In this example, we're going to build the OpenBSD configuration from the [examples](examples) directory whose `vm_name` is `openbsd-example`, so lets start with that:
 
