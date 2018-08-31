@@ -1,0 +1,71 @@
+{
+  "description": "Example Alpine installation on VMM",
+
+  "variables": {
+    "hostname":    "alpine",
+    "domain":      "example.com",
+    "nameservers": "4.4.8.8 8.8.8.8",
+
+    "username": "packer",
+    "password": "packer",
+
+    "public_key": "ssh-rsa AAAA...."
+  },
+
+  "builders": [
+    {
+      "type":      "vmm",
+      "vm_name":   "alpine-example",
+      "disk_size": "2G",
+      "mem_size":  "512M",
+
+      "iso_urls":          ["downloads/alpine-virt-3.8.0-x86_64.iso", "https://nl.alpinelinux.org/alpine/v3.8/releases/x86_64/alpine-virt-3.8.0-x86_64.iso"],
+      "iso_checksum":      "c0daab130ff32399bfce8893d7f6c591078ce8f87e82a2b987f8832fa6cf2d76",
+      "iso_checksum_type": "sha256",
+
+      "boot_wait": "25s",
+      "boot_command": [
+        "root<enter><wait>",
+
+        "echo 'KEYMAPOPTS=\"us us\"' > answers<enter>",
+        "echo 'HOSTNAMEOPTS=\"-n {{user `hostname`}}\"' >> answers<enter>",
+        "echo 'INTERFACESOPTS=\"auto lo<enter>iface lo inet loopback<enter><enter>auto eth0<enter>iface eth0 inet dhcp<enter>\"' >> answers<enter>",
+        "echo 'DNSOPTS=\"-d {{user `domain`}} {{user `nameservers`}}\"' >> answers<enter>",
+        "echo 'TIMEZONEOPTS=\"-z UTC\"' >> answers<enter>",
+        "echo 'PROXYOPTS=\"none\"' >> answers<enter>",
+        "echo 'APKREPOSOPTS=\"https://nl.alpinelinux.org/alpine/v3.8/main\"' >> answers<enter>",
+        "echo 'SSHDOPTS=\"-c openssh\"' >> answers<enter>",
+        "echo 'NTPOPTS=\"-c openntpd\"' >> answers<enter>",
+        "echo 'DISKOPTS=\"-m sys /dev/vdb\"' >> answers<enter>",
+
+        "mkdir -p /etc/udhcpc<enter>",
+        "echo 'dns=\"{{user `nameservers`}}\"' > /etc/udhcpc/udhcpc.conf<enter>",
+
+        "ifconfig eth0 up && udhcpc -i eth0<enter><wait>",
+        "setup-alpine -f $PWD/answers<enter><wait5>",
+        "{{user `password`}}<enter><wait>",
+        "{{user `password`}}<enter><wait>",
+        "<wait10s>y<enter>",
+        "<wait40s>",
+
+        "mount /dev/vdb3 /mnt<enter><wait>",
+
+        "chroot /mnt<enter>",
+          "apk add --update curl sudo<enter><wait5s>",
+          "echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel<enter>",
+
+          "adduser -D {{user `username`}}<enter><wait>",
+          "passwd -d '{{user `password`}}' {{user `username`}}<enter>",
+          "addgroup {{user `username`}} wheel<enter>",
+
+          "install -d -o {{user `username`}} -g {{user `username`}} -m 0700 /home/{{user `username`}}/.ssh<enter>",
+          "echo '{{user `public_key`}}' > /home/{{user `username`}}/.ssh/authorized_keys<enter>",
+          "chown {{user `username`}}:{{user `username`}} /home/{{user `username`}}/.ssh/authorized_keys<enter>",
+        "exit<enter>",
+
+        "umount /mnt<enter><wait>",
+        "/sbin/poweroff<enter><wait15>"
+      ]
+    }
+  ]
+}

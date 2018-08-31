@@ -16,20 +16,19 @@ Then move the newly built `~/go/bin/packer-builder-vmm` binary to either `~/.pac
 --------
 * It is assumed that you run `packer` as an unprivileged user and that `doas` can be used to start both `vmctl` and `tee`. The `tee` command is used to get write-only access to the pseudo TTY to send the build process commands.
 * For now, instances will only be started with a local network interface. The ability to attach a network interface to a virtual switch will be added later.
-* Due to the above constraint and the inability to determine both the host and client IP address, the HTTP server functionality doesn't work.
-* Because the client IP address cannot be determined, provisioning isn't implemented yet so everything has to be packed into the `boot_command`.
+* The HTTP server, [provisioning](https://www.packer.io/docs/provisioners/index.html) and [post-processors](https://www.packer.io/docs/post-processors/index.html) are current unsupported, so everything has to be packed into the `boot_command`.
 
 3. Example
 ----------
-This project has an example packer configuration in [examples/openbsd.json](examples/openbsd.json) that references some version of OpenBSD's 6.4-beta _install64.fs_. Note that you'll probably get an error on the SHA256 hash, which you need to change yourself.
+This project has a couple of example packer configurations in the [examples](examples) directory, like [examples/alpine.json](an Alpine Linux 3.8.0 installation) and [examples/openbsd.json](an OpenBSD 6.4-beta installation). Note that you need to update the SHA256 hash of the OpenBSD installation yourself, as it references a snapshot installation file that gets updated regularly.
 
-Before any build is started, poll _vmctl_ in a separate terminal for the specific VM that the build is going to start:
+Before any build is started, poll _vmctl_ in a separate terminal for the specific VM that the build is going to start. In this example, we're going to build the OpenBSD configuration from the [examples](examples) directory whose `vm_name` is `openbsd-example`, so lets start with that:
 
 ```
 while true; do vmctl console openbsd-example; sleep 3; done
 ```
 
-Then start the actual _packer_ build:
+Now that we have something in place to monitor the build, start the _packer_ build operation:
 
 ```
 packer build examples/openbsd.json
