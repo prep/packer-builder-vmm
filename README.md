@@ -7,7 +7,7 @@ This is an OpenBSD VMM plugin for [packer](https://www.packer.io/).
 Execute the following command to install this plugin:
 
 ```
-go -u github.com/prep/packer-builder-vmm/cmd/packer-builder-vmm
+go get -u github.com/prep/packer-builder-vmm/cmd/packer-builder-vmm
 ```
 
 Then move the newly built `~/go/bin/packer-builder-vmm` binary to either `~/.packer.d/plugins` or in place it in the directory you're going to run `packer build` from.
