@@ -15,13 +15,14 @@
       "type":      "vmm",
       "vm_name":   "openbsd-example",
       "disk_size": "2G",
+      "format":    "qcow2",
       "mem_size":  "512M",
 
-      "iso_urls":          ["downloads/install64.fs", "https://ftp.nluug.nl/pub/OpenBSD/snapshots/amd64/install64.fs"],
-      "iso_checksum":      "02a7023539a1ed1d66e933c7f28db294e599f93175dc7f4eafc56a185207a8e9",
+      "iso_urls":          ["downloads/install64.fs", "https://ftp.nluug.nl/pub/OpenBSD/6.4/amd64/install64.fs"],
+      "iso_checksum":      "7aa4344cb39efbf67300f97ac7eec005b607e8c19d4e31a0a593a8ee2b7136e4",
       "iso_checksum_type": "sha256",
 
-      "boot_wait": "20s",
+      "boot_wait": "10s",
       "boot_command": [
         "S<enter>",
 
@@ -49,7 +50,7 @@
         "EOF<enter>",
 
         "install -af install.conf<enter>",
-        "<wait4m>",
+        "<wait2m>",
 
         "/sbin/halt -p<enter><wait15>"
       ]

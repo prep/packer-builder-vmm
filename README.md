@@ -17,7 +17,7 @@ Then move the newly built `~/go/bin/packer-builder-vmm` binary to either `~/.pac
 * The HTTP server, [provisioning](https://www.packer.io/docs/provisioners/index.html) and [post-processors](https://www.packer.io/docs/post-processors/index.html) are current unsupported, so everything has to be packed into the `boot_command`.
 
 ## Example
-This project has a couple of example packer configurations in the [examples](examples) directory, like [an Alpine Linux 3.8.0 installation](examples/alpine.json) and [an OpenBSD 6.4-beta installation](examples/openbsd.json). Note that you need to update the SHA256 hash of the OpenBSD installation yourself, as it references a snapshot installation file that gets updated regularly.
+This project has a couple of example packer configurations in the [examples](examples) directory, like [an Alpine Linux 3.8.0 installation](examples/alpine.json) and [an OpenBSD 6.4 installation](examples/openbsd.json).
 
 Before any build is started, poll _vmctl_ in a separate terminal for the specific VM that _packer build_ is going to spin up so that we can follow what's happening. In this example, we're going to build the OpenBSD configuration from the [examples](examples) directory whose `vm_name` is `openbsd-example`, so lets start with that:
 
