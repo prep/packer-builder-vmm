@@ -1,4 +1,4 @@
-module github.com/prep/vmm
+module github.com/prep/packer-builder-vmm
 
 require (
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de // indirect
