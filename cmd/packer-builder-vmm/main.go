@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/prep/vmm"
+	"github.com/prep/packer-builder-vmm"
 
 	"github.com/hashicorp/packer/packer/plugin"
 )
