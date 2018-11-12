@@ -26,6 +26,7 @@ type Config struct {
 	VMName    string `mapstructure:"vm_name"`
 	BiosFile  string `mapstructure:"bios_file"`
 	DiskSize  string `mapstructure:"disk_size"`
+	Format    string `mapstructure:"format`
 	MemSize   string `mapstructure:"mem_size"`
 	OutputDir string `mapstructure:"output_directory"`
 
@@ -60,6 +61,15 @@ func (builder *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if builder.config.DiskSize == "" {
 		builder.config.DiskSize = "10G"
+	}
+
+	// Support "raw" and "qcow2" format and default to "raw" when not specified.
+	switch builder.config.Format {
+	case "raw", "qcow2":
+	case "":
+		builder.config.Format = "raw"
+	default:
+		return nil, errors.New(builder.config.Format + ": unsupported image format")
 	}
 
 	if builder.config.MemSize == "" {
@@ -108,12 +118,13 @@ func (builder *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) 
 		force:      builder.config.PackerForce,
 	})
 
-	diskPath := filepath.Join(builder.config.OutputDir, builder.config.VMName) + ".raw"
+	diskPath := filepath.Join(builder.config.OutputDir, builder.config.VMName) + "." + builder.config.Format
 
 	// Create the disk.
 	steps = append(steps, &stepCreateDisk{
-		diskPath: diskPath,
-		diskSize: builder.config.DiskSize,
+		diskPath:   diskPath,
+		diskFormat: builder.config.Format,
+		diskSize:   builder.config.DiskSize,
 	})
 
 	// Set up the HTTP server.
