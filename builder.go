@@ -136,9 +136,10 @@ func (builder *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) 
 
 	// Start the VM.
 	steps = append(steps, &stepRun{
-		vmName:   builder.config.VMName,
-		diskPath: diskPath,
-		memSize:  builder.config.MemSize,
+		vmName:     builder.config.VMName,
+		diskPath:   diskPath,
+		diskFormat: builder.config.Format,
+		memSize:    builder.config.MemSize,
 	})
 
 	// Execute the boot command sequence.
@@ -200,5 +201,10 @@ func (builder *Builder) newDriver(ui packer.Ui) (Driver, error) {
 		return nil, err
 	}
 
-	return &VmmDriver{doasPath: doasPath, vmctlPath: vmctlPath, ui: ui}, nil
+	return &VmmDriver{
+		doasPath:  doasPath,
+		logPath:   filepath.Join(builder.config.OutputDir, builder.config.VMName+".log"),
+		vmctlPath: vmctlPath,
+		ui:        ui,
+	}, nil
 }

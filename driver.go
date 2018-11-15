@@ -3,6 +3,7 @@ package vmm
 import (
 	"errors"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -25,8 +26,10 @@ type Driver interface {
 // VmmDriver manages a vmm instance.
 type VmmDriver struct {
 	doasPath  string
+	logPath   string
 	vmctlPath string
 	tty       io.WriteCloser
+	log       io.Writer
 	ui        packer.Ui
 }
 
@@ -40,60 +43,43 @@ func (driver *VmmDriver) CreateDisk(path, size string) error {
 
 // Start the VM and create a pipe to insert commands into the VM.
 func (driver *VmmDriver) Start(name string, args ...string) error {
+	driver.ui.Message("Logging console output to " + driver.logPath)
+	logFile, err := os.Create(driver.logPath)
+	if err != nil {
+		return err
+	}
+	driver.log = logFile
+
 	args = append([]string{driver.vmctlPath, "start", name}, args...)
 	driver.ui.Message("Executing " + driver.doasPath + " " + strings.Join(args, " "))
 
-	// Start up the VM.
-	if err := exec.Command(driver.doasPath, args...).Run(); err != nil {
-		return err
-	}
-
-	// Give the VM a bit of time to come up.
-	time.Sleep(3 * time.Second)
-
-	// Ask for the path of the pseudo TTY.
-	devicePath, err := driver.devicePath(name)
+	cmd := exec.Command(driver.doasPath, args...)
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return err
 	}
 
-	driver.ui.Message("Executing " + driver.doasPath + " tee -a " + devicePath)
-
-	// Get a write-only socket to the pseudo TTY.
-	cmd := exec.Command(driver.doasPath, "tee", "-a", devicePath)
+	// Create an stdin pipe that is used to issue commands.
 	if driver.tty, err = cmd.StdinPipe(); err != nil {
 		return err
 	}
 
-	return cmd.Start()
-}
+	// Write the console output to the log file.
+	go func() {
+		defer stdout.Close()
+		defer logFile.Close()
 
-// devicePath returns the path to the pseudo TTY device.
-func (driver *VmmDriver) devicePath(name string) (string, error) {
-	output, err := exec.Command(driver.doasPath, driver.vmctlPath, "status", name).Output()
-	if err != nil {
-		return "", err
+		_, _ = io.Copy(logFile, stdout)
+	}()
+
+	// Start up the VM.
+	if err := cmd.Start(); err != nil {
+		return err
 	}
 
-	lines := strings.Split(string(output), "\n")
-	if len(lines) < 2 {
-		return "", errNoTTY
-	}
-
-	fields := strings.Fields(lines[0])
-	values := strings.Fields(lines[1])
-
-	if len(fields) != len(values) {
-		return "", errNoTTY
-	}
-
-	for i, field := range fields {
-		if field == "TTY" {
-			return "/dev/" + values[i], nil
-		}
-	}
-
-	return "", errNoTTY
+	// Give the VM a bit of time to start up.
+	time.Sleep(3 * time.Second)
+	return nil
 }
 
 // Stop the VM and close down the input pipe.
@@ -105,12 +91,19 @@ func (driver *VmmDriver) Stop(name string) error {
 		return err
 	}
 
-	return driver.tty.Close()
+	if driver.tty != nil {
+		return driver.tty.Close()
+	}
+
+	return nil
 }
 
 // SendKey sends a key press.
 func (driver *VmmDriver) SendKey(key rune, action bootcommand.KeyAction) error {
-	_, err := driver.tty.Write([]byte{byte(key)})
+	data := []byte{byte(key)}
+
+	_, _ = driver.log.Write(data)
+	_, err := driver.tty.Write(data)
 	return err
 }
 
@@ -123,7 +116,8 @@ func (driver *VmmDriver) SendSpecial(special string, action bootcommand.KeyActio
 	}
 
 	if len(data) != 0 {
-		_, err := driver.tty.Write([]byte{'\n'})
+		_, _ = driver.log.Write(data)
+		_, err := driver.tty.Write(data)
 		return err
 	}
 

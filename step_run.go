@@ -8,9 +8,10 @@ import (
 )
 
 type stepRun struct {
-	vmName   string
-	diskPath string
-	memSize  string
+	vmName     string
+	diskPath   string
+	diskFormat string
+	memSize    string
 }
 
 func (step *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -18,7 +19,7 @@ func (step *stepRun) Run(ctx context.Context, state multistep.StateBag) multiste
 	driver := state.Get("driver").(Driver)
 	isoPath := state.Get("iso_path").(string)
 
-	args := []string{"-L", "-d", isoPath, "-d", step.diskPath, "-m", step.memSize}
+	args := []string{"-c", "-L", "-d", isoPath, "-d", step.diskFormat + ":" + step.diskPath, "-m", step.memSize}
 
 	ui.Say("Starting VMM instance " + step.vmName)
 	if err := driver.Start(step.vmName, args...); err != nil {
