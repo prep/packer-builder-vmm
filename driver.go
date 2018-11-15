@@ -29,7 +29,6 @@ type VmmDriver struct {
 	logPath   string
 	vmctlPath string
 	tty       io.WriteCloser
-	log       io.Writer
 	ui        packer.Ui
 }
 
@@ -48,7 +47,6 @@ func (driver *VmmDriver) Start(name string, args ...string) error {
 	if err != nil {
 		return err
 	}
-	driver.log = logFile
 
 	args = append([]string{driver.vmctlPath, "start", name}, args...)
 	driver.ui.Message("Executing " + driver.doasPath + " " + strings.Join(args, " "))
@@ -102,23 +100,23 @@ func (driver *VmmDriver) Stop(name string) error {
 func (driver *VmmDriver) SendKey(key rune, action bootcommand.KeyAction) error {
 	data := []byte{byte(key)}
 
-	_, _ = driver.log.Write(data)
-	_, err := driver.tty.Write(data)
+	_, err := driver.tty.Write(data); err != nil {
 	return err
 }
 
 // SendSpecial sends a special character.
 func (driver *VmmDriver) SendSpecial(special string, action bootcommand.KeyAction) error {
 	var data []byte
+
 	switch special {
 	case "enter":
 		data = []byte("\n")
 	}
 
 	if len(data) != 0 {
-		_, _ = driver.log.Write(data)
-		_, err := driver.tty.Write(data)
-		return err
+		if _, err := driver.tty.Write(data); err != nil {
+			return err
+		}
 	}
 
 	return nil
