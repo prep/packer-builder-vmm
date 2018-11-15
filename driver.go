@@ -100,7 +100,7 @@ func (driver *VmmDriver) Stop(name string) error {
 func (driver *VmmDriver) SendKey(key rune, action bootcommand.KeyAction) error {
 	data := []byte{byte(key)}
 
-	_, err := driver.tty.Write(data); err != nil {
+	_, err := driver.tty.Write(data)
 	return err
 }
 
