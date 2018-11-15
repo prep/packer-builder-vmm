@@ -33,5 +33,13 @@ tail -f output-vmm/openbsd-example.log
 When the build is done, packer should have left you a `output-vmm/openbsd-example.qcow2` bootable disk image of a clean OpenBSD installation, which you can immediately boot:
 
 ```
-vmctl start openbsd-example -c -d output-vmm/openbsd-example.qcow2 -L
+vmctl start openbsd-example -cL -d output-vmm/openbsd-example.qcow2
+```
+
+## Hint
+If you've built a `qcow2` image as was done in the above example, you can also use it as a read-only base for a new image that only contains the changes written by the VM:
+
+```
+vmctl create new-vm.qcow2 -b output-vmm/openbsd-example.qcow2
+vmctl start new-vm -cL -d new-vm.qcow2
 ```
